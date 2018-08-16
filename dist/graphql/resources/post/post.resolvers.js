@@ -5,34 +5,38 @@ const composable_resolver_1 = require("../../composable/composable.resolver");
 const auth_resolver_1 = require("../../composable/auth.resolver");
 exports.postResolvers = {
     Post: {
-        author: (post, args, { db }, info) => {
-            return db.User
-                .findById(post.get('author'))
+        author: (post, args, { db, dataloaders: { userLoader } }, info) => {
+            return userLoader
+                .load({ key: post.get('author'), info })
                 .catch(utils_1.handleError);
         },
-        comments: (post, { first = 10, offset = 0 }, { db }, info) => {
+        comments: (post, { first = 10, offset = 0 }, { db, requestedFields }, info) => {
             return db.Comment
                 .findAll({
                 where: { post: post.get('id') },
                 limit: first,
-                offset: offset
+                offset: offset,
+                attributes: requestedFields.getFields(info)
             })
                 .catch(utils_1.handleError);
         }
     },
     Query: {
-        posts: (parent, { first = 10, offset = 0 }, { db }, info) => {
+        posts: (parent, { first = 10, offset = 0 }, { db, requestedFields }, info) => {
             return db.Post
                 .findAll({
                 limit: first,
-                offset: offset
+                offset: offset,
+                attributes: requestedFields.getFields(info, { keep: ['id'], exclude: ['comments'] })
             })
                 .catch(utils_1.handleError);
         },
-        post: (parent, { id }, { db }, info) => {
+        post: (parent, { id }, { db, requestedFields }, info) => {
             id = parseInt(id);
             return db.Post
-                .findById(id)
+                .findById(id, {
+                attributes: requestedFields.getFields(info, { keep: ['id'], exclude: ['comments'] })
+            })
                 .then((post) => {
                 utils_1.throwError(!post, `Post with id ${id} not found.`);
                 return post;

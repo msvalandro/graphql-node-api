@@ -23,15 +23,15 @@ gulp.task('static', ['clean'], () => {
 gulp.task('clean', () => {
 
 	return gulp
-		.src('dist')
-		pipe(clean());
+		.src('dist/*')
+		.pipe(clean());
 });
 
 gulp.task('build', ['scripts']);
 
 gulp.task('watch', ['build'], () => {
 
-	return gulp.watch(['src/**/**.ts', 'src/**/*.json'], ['build']);
+	return gulp.watch(['src/**/*.ts', 'src/**/*.json'], ['build']);
 });
 
 gulp.task('default', ['watch']);

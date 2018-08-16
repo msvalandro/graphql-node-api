@@ -5,25 +5,26 @@ const composable_resolver_1 = require("../../composable/composable.resolver");
 const auth_resolver_1 = require("../../composable/auth.resolver");
 exports.commentResolvers = {
     Comment: {
-        user: (comment, args, { db }, info) => {
-            return db.User
-                .findById(comment.get('user'))
+        user: (comment, args, { db, dataloaders: { userLoader } }, info) => {
+            return userLoader
+                .load({ key: comment.get('user'), info })
                 .catch(utils_1.handleError);
         },
-        post: (comment, args, { db }, info) => {
-            return db.Post
-                .findById(comment.get('post'))
+        post: (comment, args, { db, dataloaders: { postLoader } }, info) => {
+            return postLoader
+                .load({ key: comment.get('post'), info })
                 .catch(utils_1.handleError);
         }
     },
     Query: {
-        commentsByPost: (parent, { postId, first = 10, offset = 0 }, { db }, info) => {
+        commentsByPost: (parent, { postId, first = 10, offset = 0 }, { db, requestedFields }, info) => {
             postId = parseInt(postId);
             return db.Comment
                 .findAll({
                 where: { post: postId },
                 limit: first,
-                offset: offset
+                offset: offset,
+                attributes: requestedFields.getFields(info)
             })
                 .catch(utils_1.handleError);
         }

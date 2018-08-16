@@ -1,6 +1,7 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import * as Sequelize from 'sequelize';
+
 import { DbConnection } from '../interfaces/DbConnectionInterface';
 
 const basename: string = path.basename(module.filename);
@@ -11,7 +12,9 @@ let db = null;
 if (!db) {
 	db = {};
 
-	const operatorsAliases = false;
+	const operatorsAliases = {
+		$in: Sequelize.Op.in
+	};
 
 	config = Object.assign({operatorsAliases}, config);
 
