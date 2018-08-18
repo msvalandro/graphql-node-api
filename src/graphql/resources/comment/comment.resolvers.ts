@@ -24,17 +24,17 @@ export const commentResolvers = {
 		}
 	},
 	Query: {
-		commentsByPost: (parent, {postId, first = 10, offset = 0}, {db, requestedFields}: {db: DbConnection, requestedFields: RequestedFields}, info: GraphQLResolveInfo) => {
+		commentsByPost: compose()((parent, {postId, first = 10, offset = 0}, {db, requestedFields}: {db: DbConnection, requestedFields: RequestedFields}, info: GraphQLResolveInfo) => {
 			postId = parseInt(postId);			
 			return db.Comment
 				.findAll({
 					where: {post: postId},
 					limit: first,
 					offset: offset,
-					attributes: requestedFields.getFields(info)
+					attributes: requestedFields.getFields(info, {keep: undefined})
 				})
 				.catch(handleError);				
-		}
+		})
 	},
 	Mutation: {
 		createComment: compose(...authResolvers)((parent, {input}, {db, authUser}: {db: DbConnection, authUser: AuthUser}, info: GraphQLResolveInfo) => {
